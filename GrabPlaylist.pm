@@ -23,7 +23,9 @@ use Slim::Player::Client;
 use vars qw($VERSION);
 $VERSION = "0.3";
 
-sub getDisplayName() { return "PLUGIN_GRABPLAYLIST_NAME" };
+sub getDisplayName() {
+	return substr ($::VERSION, 0, 1) >= 6 ? 'PLUGIN_GRABPLAYLIST_NAME' : string('PLUGIN_GRABPLAYLIST_NAME');
+}
 
 ##################################################
 ### Section 2. Your variables and code go here ###
