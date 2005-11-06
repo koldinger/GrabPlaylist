@@ -21,7 +21,7 @@ use Slim::Player::Client;
 
 # Export the version to the server
 use vars qw($VERSION);
-$VERSION = "0.3";
+$VERSION = "0.4";
 
 sub getDisplayName() {
 	return substr ($::VERSION, 0, 1) >= 6 ? 'PLUGIN_GRABPLAYLIST_NAME' : string('PLUGIN_GRABPLAYLIST_NAME');
@@ -80,13 +80,18 @@ my %functions = (
 		$line1 = string('PLUGIN_GRABPLAYLIST_NAME');
 		$line2 = string('PLUGIN_GRABPLAYLIST_COPYING') . " " .
 			 Slim::Player::Client::name(clientAt($client, $positions{$client}));
+		$client->showBriefly($line1, $line2);
+
 		# Slim::Control::Command::execute($client, \@pargs, undef, undef);
 		my $other = clientAt($client, $positions{$client});
+
 		Slim::Control::Command::execute($client, ['stop']);
-		$client->showBriefly($line1, $line2);
+
+		my $offset = Slim::Player::Source::songTime($other);
 		Slim::Player::Playlist::copyPlaylist($client, $other);
 		Slim::Control::Command::execute($other, ['stop']);
 		Slim::Control::Command::execute($client, ['play']);
+		Slim::Player::Source::gototime($client, $offset, 1);
 		# $other->execute("stop");
 	}
 );
