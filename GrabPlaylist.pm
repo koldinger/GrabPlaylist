@@ -21,14 +21,9 @@ use Slim::Player::Client;
 
 # Export the version to the server
 use vars qw($VERSION);
-$VERSION = "0.2";
+$VERSION = "0.3";
 
 sub getDisplayName() { return "PLUGIN_GRABPLAYLIST_NAME" };
-
-sub strings() {
-    local $/ = undef;
-    <DATA>;
-};
 
 ##################################################
 ### Section 2. Your variables and code go here ###
@@ -49,11 +44,7 @@ sub setMode {
 }
 
 sub enabled { 
-    my $client = shift;
-# $::d_plugins && msg("Checking enabled\n");
-    my $numClients = Slim::Player::Client::clientCount();
-	# make sure there's more than one
-	return ($numClients > 1);
+    return 1;
 }
 
 my %functions = (
@@ -131,11 +122,11 @@ sub lines {
 }
 
 sub initPlugin {
-    $::d_plugins && msg(string('PLUGIN_GRABPLAYLIST_STARTING'));
+    $::d_plugins && msg(string('PLUGIN_GRABPLAYLIST_STARTING') . " -- $VERSION\n");
 }
 
 sub shutdownPlugin {
-    $::d_plugins && msg(string('PLUGIN_GRABPLAYLIST_STOPPING'));
+    $::d_plugins && msg(string('PLUGIN_GRABPLAYLIST_STOPPING') . " -- $VERSION\n");
 }
 	
 ################################################
@@ -146,10 +137,9 @@ sub getFunctions() {
 	return \%functions;
 }
 
-1;
 
-__DATA__
-
+sub strings() {
+    return "
 PLUGIN_GRABPLAYLIST_NAME
 	EN	Grab Playlist
 
@@ -164,3 +154,7 @@ PLUGIN_GRABPLAYLIST_STARTING
 
 PLUGIN_GRABPLAYLIST_STOPPING
 	EN	Grab Playlist Shutting Down
+";
+}
+
+1;
