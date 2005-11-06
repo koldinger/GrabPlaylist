@@ -16,23 +16,19 @@ package Plugins::GrabPlaylist;
 
 use Slim::Utils::Strings qw (string);
 use Slim::Utils::Misc;
+use Slim::Player::Player;
+use Slim::Player::Client;
 
 # Export the version to the server
 use vars qw($VERSION);
-$VERSION = "0.1";
+$VERSION = "0.2";
 
-sub getDisplayName() { return string('PLUGIN_GRABPLAYLIST_NAME') };
+sub getDisplayName() { return "PLUGIN_GRABPLAYLIST_NAME" };
 
-sub strings() {  return '
-PLUGIN_GRABPLAYLIST_NAME
-	EN	Grab Playlist
-
-PLUGIN_GRABPLAYLIST_SELECT_PLAYER
-	EN	Select Player.  Press PLAY to copy.
-
-PLUGIN_GRABPLAYLIST_COPYING
-	EN	Copying playlist from player
-'};
+sub strings() {
+    local $/ = undef;
+    <DATA>;
+};
 
 ##################################################
 ### Section 2. Your variables and code go here ###
@@ -92,8 +88,13 @@ my %functions = (
 		$line2 = string('PLUGIN_GRABPLAYLIST_COPYING') . " " .
 			 Slim::Player::Client::name(clientAt($client, $positions{$client}));
 		# Slim::Control::Command::execute($client, \@pargs, undef, undef);
+		my $other = clientAt($client, $positions{$client});
+		Slim::Control::Command::execute($client, ['stop']);
 		$client->showBriefly($line1, $line2);
-		Slim::Player::Playlist::copyPlaylist($client, clientAt($client, $positions{$client}));
+		Slim::Player::Playlist::copyPlaylist($client, $other);
+		Slim::Control::Command::execute($other, ['stop']);
+		Slim::Control::Command::execute($client, ['play']);
+		# $other->execute("stop");
 	}
 );
 
@@ -128,6 +129,14 @@ sub lines {
 	$line2 = Slim::Player::Client::name(clientAt($client, $positions{$client}));
 	return ($line1, $line2);
 }
+
+sub initPlugin {
+    $::d_plugins && msg(string('PLUGIN_GRABPLAYLIST_STARTING'));
+}
+
+sub shutdownPlugin {
+    $::d_plugins && msg(string('PLUGIN_GRABPLAYLIST_STOPPING'));
+}
 	
 ################################################
 ### End of Section 2.                        ###
@@ -138,3 +147,20 @@ sub getFunctions() {
 }
 
 1;
+
+__DATA__
+
+PLUGIN_GRABPLAYLIST_NAME
+	EN	Grab Playlist
+
+PLUGIN_GRABPLAYLIST_SELECT_PLAYER
+	EN	Select Player.  Press PLAY to copy.
+
+PLUGIN_GRABPLAYLIST_COPYING
+	EN	Copying playlist from player
+
+PLUGIN_GRABPLAYLIST_STARTING
+	EN	Grab Playlist Starting
+
+PLUGIN_GRABPLAYLIST_STOPPING
+	EN	Grab Playlist Shutting Down
