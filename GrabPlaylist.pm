@@ -21,7 +21,7 @@ use Slim::Player::Client;
 
 # Export the version to the server
 use vars qw($VERSION);
-$VERSION = "0.4";
+$VERSION = "0.5";
 
 sub getDisplayName() {
 	return substr ($::VERSION, 0, 1) >= 6 ? 'PLUGIN_GRABPLAYLIST_NAME' : string('PLUGIN_GRABPLAYLIST_NAME');
@@ -52,6 +52,11 @@ sub enabled {
 my %functions = (
 	'up' => sub { 
 		my $client = shift;
+		if ($numClients{$client} == 0) {
+		    #noClientsError($client);
+		    $client->bumpUp();
+		    return;
+		}
                 my $newPos = Slim::Buttons::Common::scroll
 				($client, -1, $numClients{$client},
 				$positions{$client});
@@ -60,6 +65,11 @@ my %functions = (
 	},
         'down' => sub  {
                 my $client = shift;
+		if ($numClients{$client} == 0) {
+		    # noClientsError($client);
+		    $client->bumpDown();
+		    return;
+		}
                 my $newPos = Slim::Buttons::Common::scroll
 				($client, +1, $numClients{$client},
 				$positions{$client});
@@ -76,25 +86,45 @@ my %functions = (
 	},
 	'play' => sub {
 		my $client = shift;
-		my ($line1, $line2);
-		$line1 = string('PLUGIN_GRABPLAYLIST_NAME');
-		$line2 = string('PLUGIN_GRABPLAYLIST_COPYING') . " " .
-			 Slim::Player::Client::name(clientAt($client, $positions{$client}));
-		$client->showBriefly($line1, $line2);
-
-		# Slim::Control::Command::execute($client, \@pargs, undef, undef);
+		# Make sure there's someplace to put it
+		if ($numClients{$client} == 0) {
+		    noClientsError($client);
+		    return;
+		}
 		my $other = clientAt($client, $positions{$client});
-
-		Slim::Control::Command::execute($client, ['stop']);
-
-		my $offset = Slim::Player::Source::songTime($other);
-		Slim::Player::Playlist::copyPlaylist($client, $other);
-		Slim::Control::Command::execute($other, ['stop']);
-		Slim::Control::Command::execute($client, ['play']);
-		Slim::Player::Source::gototime($client, $offset, 1);
-		# $other->execute("stop");
-	}
+		my $line1 = string('PLUGIN_GRABPLAYLIST_NAME');
+		my $line2 = string('PLUGIN_GRABPLAYLIST_COPYING_FROM') . " " .  Slim::Player::Client::name($other);
+		$client->showBriefly($line1, $line2);
+		transferPlaylist($client, $other);
+	},
+	'add' => sub {
+		my $client = shift;
+		# Make sure there's someplace to put it
+		if ($numClients{$client} == 0) {
+		    noClientsError($client);
+		    return;
+		}
+		my $other = clientAt($client, $positions{$client});
+		my $line1 = string('PLUGIN_GRABPLAYLIST_NAME');
+		my $line2 = string('PLUGIN_GRABPLAYLIST_SENDING_TO') . " " .  Slim::Player::Client::name($other);
+		$client->showBriefly($line1, $line2);
+		transferPlaylist($other, $client);
+	},
 );
+
+sub transferPlaylist {
+    my $dest = shift;
+    my $source = shift;
+
+    Slim::Control::Command::execute($dest, ['stop']);
+
+    my $offset = Slim::Player::Source::songTime($source);
+
+    Slim::Player::Playlist::copyPlaylist($dest, $source);
+    Slim::Control::Command::execute($source, ['stop']);
+    Slim::Control::Command::execute($dest, ['play']);
+    Slim::Player::Source::gototime($dest, $offset, 1);
+}
 
 sub clientAt {
     my $client = shift;
@@ -124,8 +154,21 @@ sub lines {
 	#$::d_plugins && msg("Generating lines for " . $client->name() . ": $positions{$client}\n");
 	#$::d_plugins && msg("ClientAt($positions{$client}): " . clientAt($client, $positions{$client}) . "\n");
 	$line1 = string('PLUGIN_GRABPLAYLIST_SELECT_PLAYER');
-	$line2 = Slim::Player::Client::name(clientAt($client, $positions{$client}));
+	if ($numClients{$client} == 0)
+	{
+	    $line2 = string('PLUGIN_GRABPLAYLIST_NONE');
+	} else {
+	    $line2 = Slim::Player::Client::name(clientAt($client, $positions{$client}));
+	}
 	return ($line1, $line2);
+}
+
+sub noClientsError {
+    my $client = shift;
+    my ($line1, $line2);
+    $line1 = string('PLUGIN_GRABPLAYLIST_NAME');
+    $line2 = string('PLUGIN_GRABPLAYLIST_NO_OTHERS');
+    $client->showBriefly($line1, $line2);
 }
 
 sub initPlugin {
@@ -144,7 +187,6 @@ sub getFunctions() {
 	return \%functions;
 }
 
-
 sub strings() {
     return "
 PLUGIN_GRABPLAYLIST_NAME
@@ -153,8 +195,17 @@ PLUGIN_GRABPLAYLIST_NAME
 PLUGIN_GRABPLAYLIST_SELECT_PLAYER
 	EN	Select Player.  Press PLAY to copy.
 
-PLUGIN_GRABPLAYLIST_COPYING
+PLUGIN_GRABPLAYLIST_COPYING_FROM
 	EN	Copying playlist from player
+
+PLUGIN_GRABPLAYLIST_SENDING_TO
+	EN	Sending playlist to player
+
+PLUGIN_GRABPLAYLIST_NO_OTHERS
+	EN	No other players available
+
+PLUGIN_GRABPLAYLIST_NONE
+	EN	Nothing Available
 
 PLUGIN_GRABPLAYLIST_STARTING
 	EN	Grab Playlist Starting
