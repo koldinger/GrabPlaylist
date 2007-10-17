@@ -1,0 +1,26 @@
+PLUGIN_GRABPLAYLIST_NAME
+	EN	Grab Playlist
+
+PLUGIN_GRABPLAYLIST_DESC
+	EN	Move playlists quickly from one player to another
+
+PLUGIN_GRABPLAYLIST_SELECT_PLAYER
+	EN	Select Player.  Press PLAY to copy.
+
+PLUGIN_GRABPLAYLIST_COPYING_FROM
+	EN	Copying playlist from player
+
+PLUGIN_GRABPLAYLIST_SENDING_TO
+	EN	Sending playlist to player
+
+PLUGIN_GRABPLAYLIST_NO_OTHERS
+	EN	No other players available
+
+PLUGIN_GRABPLAYLIST_NONE
+	EN	Nothing Available
+
+PLUGIN_GRABPLAYLIST_STARTING
+	EN	Grab Playlist Starting
+
+PLUGIN_GRABPLAYLIST_STOPPING
+	EN	Grab Playlist Shutting Down
