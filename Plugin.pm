@@ -12,7 +12,7 @@ use strict;
 ### Section 1. Change these as required ###
 ###########################################
 
-package Plugins::GrabPlaylist;
+package Plugins::GrabPlaylist::Plugin;
 
 use Slim::Utils::Strings qw (string);
 use Slim::Utils::Misc;
@@ -22,11 +22,11 @@ use Slim::Player::Client;
 
 # Export the version to the server
 use vars qw($VERSION);
-$VERSION = "0.5";
+$VERSION = "1.0";
 
-my $log = Slim::Util::Log->addNewLogCategory({
+my $log = Slim::Utils::Log->addLogCategory({
     'category' => 'plugin.grabplaylist',
-    'defaultLevel' => 'WARN'
+    'defaultLevel' => 'DEBUG'
 });
 
 sub getDisplayName() {
@@ -47,7 +47,7 @@ sub setMode {
 	my @clients = otherClients($client);
         $clientLists{$client} = \@clients;
 	$numClients{$client} = $#clients + 1;
-	logInfo("Setting mode for " . $client->name() . ": $numClients{$client} clients");
+	$log->info("Setting mode for " . $client->name() . ": $numClients{$client} clients");
 	$client->lines(\&lines);
 }
 
@@ -142,23 +142,23 @@ sub clientAt {
 sub otherClients {
     my $client = shift;
     my @clients = ();
-    logInfo("Generating Clients list for " . $client->name());
+    $log->info("Generating Clients list for " . $client->name());
     foreach my $i (Slim::Player::Client::clients()) 
     {
 	if ($i != $client) {
-	    logDebug("   " . $i->name());
+	    $log->debug("   " . $i->name());
 	    push @clients, $i;
 	}
     }
-    logDebug("Got " . ($#clients + 1) . " clients");
+    $log->debug("Got " . ($#clients + 1) . " clients");
     return @clients;
 }
 
 sub lines {
 	my $client = shift;
 	my ($line1, $line2);
-	logInfo("Generating lines for " . $client->name() . ": $positions{$client}");
-	logDebug("ClientAt($positions{$client}): " . clientAt($client, $positions{$client}));
+	$log->info("Generating lines for " . $client->name() . ": $positions{$client}");
+	$log->debug("ClientAt($positions{$client}): " . clientAt($client, $positions{$client}));
 	$line1 = string('PLUGIN_GRABPLAYLIST_SELECT_PLAYER');
 	if ($numClients{$client} == 0)
 	{
@@ -178,11 +178,11 @@ sub noClientsError {
 }
 
 sub initPlugin {
-    logInfo(string('PLUGIN_GRABPLAYLIST_STARTING') . " -- $VERSION");
+    $log->info(string('PLUGIN_GRABPLAYLIST_STARTING') . " -- $VERSION");
 }
 
 sub shutdownPlugin {
-    logInfo(string('PLUGIN_GRABPLAYLIST_STOPPING') . " -- $VERSION");
+    $log->info(string('PLUGIN_GRABPLAYLIST_STOPPING') . " -- $VERSION");
 }
 	
 ################################################
