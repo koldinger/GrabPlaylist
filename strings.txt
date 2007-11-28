@@ -5,7 +5,7 @@ PLUGIN_GRABPLAYLIST_DESC
 	EN	Move playlists quickly from one player to another
 
 PLUGIN_GRABPLAYLIST_SELECT_PLAYER
-	EN	Select Player.  Press PLAY to copy.
+	EN	Play to get playlist.  Add to put.
 
 PLUGIN_GRABPLAYLIST_COPYING_FROM
 	EN	Copying playlist from player
