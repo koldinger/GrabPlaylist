@@ -10,7 +10,7 @@
   <module>Plugins::GrabPlaylist::Plugin</module>
   <targetApplication>
     <id>SqueezeCenter</id>
-    <maxVersion>7.0+</maxVersion>
+    <maxVersion>*</maxVersion>
     <minVersion>7.0a</minVersion>
   </targetApplication>
   <type>2</type>
