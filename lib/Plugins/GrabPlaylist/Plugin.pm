@@ -27,9 +27,9 @@ use vars qw($VERSION);
 $VERSION = "1.0";
 
 my $log = Slim::Utils::Log->addLogCategory({
-    'category' => 'plugin.grabplaylist',
-    'defaultLevel' => 'INFO',
-    'description' => 'PLUGIN_GRABPLAYLIST_NAME'
+	'category' => 'plugin.grabplaylist',
+	'defaultLevel' => 'INFO',
+	'description' => 'PLUGIN_GRABPLAYLIST_NAME'
 });
 
 sub getDisplayName() {
@@ -47,43 +47,43 @@ my %numClients = ();
 sub setMode {
 	my $class = shift;
 	my $client = shift;
-	$positions {$client} = 0 if (!defined $positions{$client});
+
+	$positions {$client} = 0 unless defined $positions{$client};
+
 	my @clients = otherClients($client);
-        $clientLists{$client} = \@clients;
+	$clientLists{$client} = \@clients;
 	$numClients{$client} = $#clients + 1;
 	$log->debug("Setting mode for " . $client->name() . ": $numClients{$client} clients");
 	$client->lines(\&lines);
-}
-
-sub enabled { 
-    return 1;
 }
 
 my %functions = (
 	'up' => sub { 
 		my $client = shift;
 		if ($numClients{$client} == 1) {
-		    #noClientsError($client);
-		    $client->bumpUp();
-		    return;
+			#noClientsError($client);
+			$client->bumpUp();
+			return;
 		}
-                my $newPos = Slim::Buttons::Common::scroll
-				($client, -1, $numClients{$client},
-				$positions{$client});
-                $positions{$client} = $newPos;
+		my $newPos = Slim::Buttons::Common::scroll ($client,
+													-1,
+													$numClients{$client},
+													$positions{$client});
+		$positions{$client} = $newPos;
 		$client->update();
 	},
-        'down' => sub  {
-                my $client = shift;
+		'down' => sub  {
+				my $client = shift;
 		if ($numClients{$client} == 1) {
-		    # noClientsError($client);
-		    $client->bumpDown();
-		    return;
+			# noClientsError($client);
+			$client->bumpDown();
+			return;
 		}
-                my $newPos = Slim::Buttons::Common::scroll
-				($client, +1, $numClients{$client},
-				$positions{$client});
-                $positions{$client} = $newPos;
+		my $newPos = Slim::Buttons::Common::scroll ($client,
+													+1,
+													$numClients{$client},
+													$positions{$client});
+		$positions{$client} = $newPos;
 		$client->update();
 	},
 	'left' => sub {
@@ -98,8 +98,8 @@ my %functions = (
 		my $client = shift;
 		# Make sure there's someplace to put it
 		if ($numClients{$client} == 0) {
-		    noClientsError($client);
-		    return;
+			noClientsError($client);
+			return;
 		}
 		my $other = clientAt($client, $positions{$client});
 		my $line1 = string('PLUGIN_GRABPLAYLIST_NAME');
@@ -111,8 +111,8 @@ my %functions = (
 		my $client = shift;
 		# Make sure there's someplace to put it
 		if ($numClients{$client} == 0) {
-		    noClientsError($client);
-		    return;
+			noClientsError($client);
+			return;
 		}
 		my $other = clientAt($client, $positions{$client});
 		my $line1 = string('PLUGIN_GRABPLAYLIST_NAME');
@@ -123,83 +123,95 @@ my %functions = (
 );
 
 sub transferPlaylist {
-    my $dest = shift;
-    my $source = shift;
+	my $dest = shift;
+	my $source = shift;
 
-    Slim::Control::Request::executeRequest($dest, ['stop']);
+	Slim::Control::Request::executeRequest($dest, ['stop']);
 
-    my $offset = Slim::Player::Source::songTime($source);
+	my $offset = Slim::Player::Source::songTime($source);
 
-    Slim::Player::Playlist::copyPlaylist($dest, $source);
-    Slim::Control::Request::executeRequest($source, ['stop']);
-    Slim::Control::Request::executeRequest($dest, ['play']);
-    Slim::Player::Source::gototime($dest, $offset, 1);
+	Slim::Player::Playlist::copyPlaylist($dest, $source);
+	Slim::Control::Request::executeRequest($source, ['stop']);
+	Slim::Control::Request::executeRequest($dest, ['play']);
+	Slim::Player::Source::gototime($dest, $offset, 1);
 }
 
 sub clientAt {
-    my $client = shift;
-    my $pos = shift;
-    return undef if ($pos < 0 || $pos >= $numClients{$client});
-    return @{$clientLists{$client}}[$pos];
+	my $client = shift;
+	my $pos = shift;
+	return undef if ($pos < 0 || $pos >= $numClients{$client});
+	return @{$clientLists{$client}}[$pos];
 }
 
 sub otherClients {
-    my $client = shift;
-    my @clients = ();
-    $log->debug("Generating Clients list for " . $client->name());
-    foreach my $i (Slim::Player::Client::clients()) 
-    {
-	if ($i != $client) {
-	    $log->debug("   " . $i->name());
-	    push @clients, $i;
+	my $client = shift;
+	my @clients = ();
+	$log->debug("Generating Clients list for " . $client->name());
+	foreach my $i (Slim::Player::Client::clients()) 
+	{
+		if ($i != $client) {
+			$log->debug("   " . $i->name());
+			push @clients, $i;
+		}
 	}
-    }
-    $log->debug("Got " . ($#clients + 1) . " clients");
-    return @clients;
+	$log->debug("Got " . ($#clients + 1) . " clients");
+	return @clients;
 }
 
 sub lines {
 	my $client = shift;
 	my ($line1, $line2);
 	$log->debug("Generating lines for " . $client->name() . ": $positions{$client}: " .
-		    $numClients{$client});
+			$numClients{$client});
 	$line1 = string('PLUGIN_GRABPLAYLIST_SELECT_PLAYER');
 	if ($numClients{$client} == 0)
 	{
-	    $log->debug($client->name() . ":: " .  string('PLUGIN_GRABPLAYLIST_NONE'));
-	    $line2 = string('PLUGIN_GRABPLAYLIST_NONE');
+		$log->debug($client->name() . ":: " .  string('PLUGIN_GRABPLAYLIST_NONE'));
+		$line2 = string('PLUGIN_GRABPLAYLIST_NONE');
 	} else {
-	    $log->debug("ClientAt($positions{$client}): " . clientAt($client, $positions{$client})->name());
-	    $line2 = Slim::Player::Client::name(clientAt($client, $positions{$client}));
+		$log->debug("ClientAt($positions{$client}): " . clientAt($client, $positions{$client})->name());
+		$line2 = Slim::Player::Client::name(clientAt($client, $positions{$client}));
 	}
 	return { 'line1' => $line1, 'line2' => $line2 };
 }
 
 sub noClientsError {
-    my $client = shift;
-    my ($line1, $line2);
-    $line1 = string('PLUGIN_GRABPLAYLIST_NAME');
-    $line2 = string('PLUGIN_GRABPLAYLIST_NO_OTHERS');
-    $client->showBriefly({ 'line1' => $line1, 'line2' => $line2 });
+	my $client = shift;
+	my ($line1, $line2);
+	$line1 = string('PLUGIN_GRABPLAYLIST_NAME');
+	$line2 = string('PLUGIN_GRABPLAYLIST_NO_OTHERS');
+	$client->showBriefly({ 'line1' => $line1, 'line2' => $line2 });
 }
 
 sub initPlugin {
-    my $class = shift;
-    $class->SUPER::initPlugin(@_);
+	my $class = shift;
+	$class->SUPER::initPlugin(@_);
 
-    $log->info(string('PLUGIN_GRABPLAYLIST_STARTING') . " -- $VERSION");
+	$log->info(string('PLUGIN_GRABPLAYLIST_STARTING') . " -- $VERSION");
+}
+
+
+sub webPages {
+	$log->debug("webPages called");
+
+	my $index = 'plugins/Synchronizer/index.html';
+
+	Slim::Web::HTTP::protectURI($index);
+
+	Slim::Web::Pages->addPageLinks("plugins", { 'PLUGIN_SYNCHRONIZER_NAME' => $index } );
+	Slim::Web::HTTP::addPageFunction($index, \&webHandleIndex);
 }
 
 #sub shutdownPlugin {
-    #$log->info(string('PLUGIN_GRABPLAYLIST_STOPPING') . " -- $VERSION");
+	#$log->info(string('PLUGIN_GRABPLAYLIST_STOPPING') . " -- $VERSION");
 #}
 	
 ################################################
-### End of Section 2.                        ###
+### End of Section 2.						###
 ################################################
 
 sub getFunctions() {
-    return \%functions;
+	return \%functions;
 }
 
 1;
