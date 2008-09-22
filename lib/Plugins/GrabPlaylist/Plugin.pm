@@ -209,17 +209,6 @@ sub initPlugin {
 }
 
 
-sub webPages {
-	$log->debug("webPages called");
-
-	my $index = 'plugins/Synchronizer/index.html';
-
-	Slim::Web::HTTP::protectURI($index);
-
-	Slim::Web::Pages->addPageLinks("plugins", { 'PLUGIN_SYNCHRONIZER_NAME' => $index } );
-	Slim::Web::HTTP::addPageFunction($index, \&webHandleIndex);
-}
-
 #sub shutdownPlugin {
 	#$log->info(string('PLUGIN_GRABPLAYLIST_STOPPING') . " -- $VERSION");
 #}
