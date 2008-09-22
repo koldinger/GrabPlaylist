@@ -24,7 +24,7 @@ use Slim::Player::Client;
 
 # Export the version to the server
 use vars qw($VERSION);
-$VERSION = "1.0";
+$VERSION = "1.1";
 
 my $log = Slim::Utils::Log->addLogCategory({
 	'category' => 'plugin.grabplaylist',
@@ -126,6 +126,8 @@ sub transferPlaylist {
 	my $dest = shift;
 	my $source = shift;
 
+	$log->debug("transferPlaylist: " . $dest->name() . " " . $source->name());
+
 	Slim::Control::Request::executeRequest($dest, ['stop']);
 
 	my $offset = Slim::Player::Source::songTime($source);
@@ -188,6 +190,22 @@ sub initPlugin {
 	$class->SUPER::initPlugin(@_);
 
 	$log->info(string('PLUGIN_GRABPLAYLIST_STARTING') . " -- $VERSION");
+
+    Slim::Control::Request::addDispatch(['gbTop'],[1, 1, 0, \&gbTop]);
+    Slim::Control::Request::addDispatch(['gbTransfer'],[1, 1, 1, \&gbTransfer]);
+ 
+    my @menu = ({
+        text   => string('PLUGIN_GRABPLAYLIST_NAME'),
+        id     => 'pluginGrabplaylist',
+        weight => 1,
+        actions => {
+            go => {
+                player  => 0,
+                cmd     => [ 'gbTop' ],
+            }
+        },
+    });
+    Slim::Control::Jive::registerPluginMenu(\@menu, 'extras');
 }
 
 
@@ -212,6 +230,88 @@ sub webPages {
 
 sub getFunctions() {
 	return \%functions;
+}
+
+################################################
+### Section 3.  Jive Menus                   ###
+################################################
+
+sub gbTop {
+    my $request = shift;
+    my $client = $request->client();
+    $log->debug("gbTop called " . $client->name());
+    my @menu = ();
+
+    my @clients = otherClients($client);
+    foreach my $other (@clients) {
+		$log->debug("Adding " . $other->name);
+        push @menu, {
+            text	=> $other->name(),
+            window  => { menuStyle => 'album' },
+            actions => {
+                do  => {
+                    player  => 0,
+                    cmd     => [ 'gbTransfer' ],
+                    params  => {
+                        menu    => 'gbTransfer',
+                        source  => $other->id(),
+                        dest    => $client->id(),
+                    },
+                },
+                play => {
+                    player  => 0,
+                    cmd     => [ 'gbTransfer' ],
+                    params  => {
+                        menu    => 'gbTransfer',
+                        source  => $other->id(),
+                        dest    => $client->id(),
+                    },
+				},
+                add => {
+                    player  => 0,
+                    cmd     => [ 'gbTransfer' ],
+                    params  => {
+                        menu    => 'gbTransfer',
+                        source  => $client->id(),
+                        dest    => $other->id(),
+                    },
+				},
+            },
+        };
+    }
+
+    packageResponse($request, \@menu);
+
+    $request->setStatusDone();
+}
+
+sub gbTransfer {
+    my $request = shift;
+	my $source = $request->getParam('source');
+	my $dest   = $request->getParam('dest');
+    $log->debug("gbTransfer called " . $request->client()->name() . " " . $source . " to " . $dest);
+
+	transferPlaylist(Slim::Player::Client::getClient($dest), Slim::Player::Client::getClient($source));
+
+    $request->setStatusDone();
+}
+
+sub packageResponse {
+    my $request = shift;
+    my $menu    = shift;
+    my $numitems = scalar(@$menu);
+
+    $log->debug("packageResponse: $numitems");
+ 
+    $request->addResult("count", $numitems);
+    $request->addResult("offset", 0);
+    my $cnt = 0;
+	my $end = $numitems - 1;
+
+	for my $eachmenu (@$menu[0..$end]) {
+		$request->setResultLoopHash('item_loop', $cnt, $eachmenu);
+		$cnt++;
+	}
 }
 
 1;
