@@ -1,26 +1,35 @@
 PLUGIN_GRABPLAYLIST_NAME
 	EN	Grab Playlist
+	DE	Hole Wiedergabeliste
 
 PLUGIN_GRABPLAYLIST_DESC
 	EN	Move playlists quickly from one player to another
+	DE	Bewege Listen schnell von einem Gerät zum anderen
 
 PLUGIN_GRABPLAYLIST_SELECT_PLAYER
 	EN	Play to get playlist.  Add to put.
+	DE	Play um Liste zu holen.  Plus zum senden.
 
 PLUGIN_GRABPLAYLIST_COPYING_FROM
 	EN	Copying playlist from player
+	DE	Kopiere Wiedergabeliste vom anderen Gerät
 
 PLUGIN_GRABPLAYLIST_SENDING_TO
 	EN	Sending playlist to player
+	DE	Sende Wiedergabeliste zum anderen Gerät
 
 PLUGIN_GRABPLAYLIST_NO_OTHERS
 	EN	No other players available
+	DE	Keine weiteren Geräte verfügbar
 
 PLUGIN_GRABPLAYLIST_NONE
 	EN	Nothing Available
+	DE	Nichts verfügbar
 
 PLUGIN_GRABPLAYLIST_STARTING
 	EN	Grab Playlist Starting
+	DE	Starte Plugin 'Hole Playlist'
 
 PLUGIN_GRABPLAYLIST_STOPPING
 	EN	Grab Playlist Shutting Down
+	DE	Beende Plugin 'Hole Playlist'

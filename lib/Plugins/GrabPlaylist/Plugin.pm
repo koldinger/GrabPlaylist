@@ -22,10 +22,6 @@ use Slim::Utils::Log;
 use Slim::Player::Player;
 use Slim::Player::Client;
 
-# Export the version to the server
-use vars qw($VERSION);
-$VERSION = "1.1";
-
 my $log = Slim::Utils::Log->addLogCategory({
 	'category' => 'plugin.grabplaylist',
 	'defaultLevel' => 'INFO',
@@ -189,7 +185,7 @@ sub initPlugin {
 	my $class = shift;
 	$class->SUPER::initPlugin(@_);
 
-	$log->info(string('PLUGIN_GRABPLAYLIST_STARTING') . " -- $VERSION");
+	$log->info(string('PLUGIN_GRABPLAYLIST_STARTING'));
 
     Slim::Control::Request::addDispatch(['gbTop'],[1, 1, 0, \&gbTop]);
     Slim::Control::Request::addDispatch(['gbTransfer'],[1, 1, 1, \&gbTransfer]);
@@ -210,7 +206,7 @@ sub initPlugin {
 
 
 #sub shutdownPlugin {
-	#$log->info(string('PLUGIN_GRABPLAYLIST_STOPPING') . " -- $VERSION");
+	#$log->info(string('PLUGIN_GRABPLAYLIST_STOPPING') . ");
 #}
 	
 ################################################
